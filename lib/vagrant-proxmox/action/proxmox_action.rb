@@ -10,14 +10,25 @@ module VagrantPlugins
         end
 
         def get_machine_ip_address(env)
+          env[:ui].info 'ProxmoxAction get_machine_ip_address called'
           config = env[:machine].provider_config
+          r = nil
           if config.vm_type == :qemu
-            env[:machine].config.vm.networks.select \
+            r = env[:machine].config.vm.networks.select \
               { |type, _| type == :forwarded_port }.first[1][:host_ip] || nil
+            env[:ui].warn 'Please setup :forwarded_port with :host_ip' if r.nil?
           else
-            env[:machine].config.vm.networks.select \
-              { |type, _| type == :public_network }.first[1][:ip] || nil
+            begin
+              r = env[:machine].config.vm.networks.select \
+                { |type, _| type == :public_network }.first[1][:ip] || nil
+            rescue StandardError => e
+              raise VagrantPlugins::Proxmox::Errors::ProxmoxActionError,
+                    error_msg: e.message,
+                    user_advice: 'Please setup :public_network with :ip'
+            end
+            env[:ui].warn 'Please setup :public_network with :ip' if r.nil?
           end
+          r
         end
 
         def get_machine_interface_name(env)
@@ -88,15 +99,17 @@ module VagrantPlugins
           networks.each do |n|
             # skip forwarded_port
             if n.first == :forwarded_port
-              env[:ui].detail I18n.t('vagrant_proxmox.network_setup_ignored',
-                                     net_config: n) if config.dry
+              if config.dry
+                env[:ui].detail I18n.t('vagrant_proxmox.network_setup_ignored',
+                                       net_config: n)
+              end
               next
             end
             # help user to find config errors, if no public_network is defined
             has_public_network = true if n.first == :public_network
             # c = network config hash
             c = n.last
-            %i(net_id bridge).each do |e|
+            %i[net_id bridge].each do |e|
               unless c.include?(e)
                 raise Errors::VMConfigError,
                       error_msg: "Network #{n} has no :#{e} element."
@@ -122,7 +135,7 @@ module VagrantPlugins
             # name=<string>
             cfg.push("name=#{c[:interface]}")
             # [,bridge=<bridge>]
-            %w(bridge firewall gw gw6 hwaddr).each do |entry|
+            %w[bridge firewall gw gw6 hwaddr].each do |entry|
               e = entry.to_sym
               next if c[e].to_s.empty? # ignore element if empty
               cfg.push("#{entry}=#{c[e]}") if c.include?(e)
@@ -159,7 +172,7 @@ module VagrantPlugins
                                ' You need to set an IP-Address'
             end
             # other options
-            %w(mtu rate tag trunks).each do |entry|
+            %w[mtu rate tag trunks].each do |entry|
               e = entry.to_sym
               next if c[e].to_s.empty? # ignore element if empty
               cfg.push("#{entry}=#{c[e]}") if c.include?(e)
@@ -268,7 +281,7 @@ module VagrantPlugins
                     error_msg: "Invalid mount point #{mp} in config."
             end
             # check required options
-            %i(volume mp backup size).each do |k|
+            %i[volume mp backup size].each do |k|
               unless c.include?(k)
                 raise Errors::VMConfigError,
                       error_msg: "MountPoint #{mp} must have a '#{k}' item"
@@ -281,12 +294,12 @@ module VagrantPlugins
                            c[:volume].to_s
                          end
             # translate booleans
-            %i(acl backup quota ro shared).each do |k|
+            %i[acl backup quota ro shared].each do |k|
               c[k] = get_rest_boolean(c[k]) unless c[k] == -1
             end
             # build config string
             cs = []
-            %i(volume mp acl backup quota ro).each do |k|
+            %i[volume mp acl backup quota ro].each do |k|
               cs.push("#{k}=#{c[k]}") unless c[k] == -1
             end
             # add size if it is zero
