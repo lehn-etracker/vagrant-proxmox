@@ -372,6 +372,7 @@ module VagrantPlugins
         @user_name = nil if @user_name == UNSET_VALUE
         @password = nil if @password == UNSET_VALUE
         @vm_type = nil if @vm_type == UNSET_VALUE
+        @vm_type = @vm_type.to_sym unless @vm_type.nil?
         @openvz_template_file = nil if @openvz_template_file == UNSET_VALUE
         @openvz_os_template = "local:vztmpl/#{File.basename @openvz_template_file}" if @openvz_template_file
         @openvz_os_template = nil if @openvz_os_template == UNSET_VALUE
