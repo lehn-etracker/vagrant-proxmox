@@ -10,6 +10,7 @@ module VagrantPlugins
         end
 
         def call(env)
+          env[:ui].info 'CreateVm tries to create your VM'
           env[:ui].info I18n.t('vagrant_proxmox.creating_vm')
           config = env[:machine].provider_config
 

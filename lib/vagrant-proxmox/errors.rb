@@ -1,6 +1,6 @@
 module VagrantPlugins
   module Proxmox
-    class ProxmoxTaskNotFinished < Exception
+    class ProxmoxTaskNotFinished < RuntimeError
     end
 
     module Errors
@@ -76,6 +76,10 @@ module VagrantPlugins
       # Internal Plugin Error (Bug)
       class InternalPluginError < VagrantProxmoxError
         error_key :internal_plugin_error
+      end
+
+      class ProxmoxActionError < VagrantProxmoxError
+        error_key :proxmox_action_error
       end
     end
   end

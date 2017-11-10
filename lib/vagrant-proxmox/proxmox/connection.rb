@@ -184,30 +184,28 @@ module VagrantPlugins
           .first
       end
 
-      private
-
       def get_task_exitstatus(task_upid)
         node = /UPID:(.*?):/.match(task_upid)[1]
         response = get "/nodes/#{node}/tasks/#{task_upid}/status"
         response[:data][:exitstatus]
       end
 
-      private
-
       def get(path)
         response = RestClient.get "#{api_url}#{path}", cookies: { PVEAuthCookie: ticket }
         JSON.parse response.to_s, symbolize_names: true
       rescue RestClient::NotImplemented
         raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError
-        raise ApiError::ServerError
+      rescue RestClient::InternalServerError => x
+        raise ApiError::ServerError.new("error while GET #{path}",
+                                        body: x.http_body,
+                                        headers: x.http_headers,
+                                        code: x.http_code,
+                                        message: x.message)
       rescue RestClient::Unauthorized
         raise ApiError::UnauthorizedError
       rescue => x
         raise ApiError::ConnectionError, x.message
       end
-
-      private
 
       def delete(path, _params = {})
         response = RestClient.delete "#{api_url}#{path}", headers
@@ -216,13 +214,15 @@ module VagrantPlugins
         raise ApiError::UnauthorizedError
       rescue RestClient::NotImplemented
         raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError
-        raise ApiError::ServerError
+      rescue RestClient::InternalServerError => x
+        raise ApiError::ServerError.new("error while DELETE #{path}",
+                                        body: x.http_body,
+                                        headers: x.http_headers,
+                                        code: x.http_code,
+                                        message: x.message)
       rescue => x
         raise ApiError::ConnectionError, x.message
       end
-
-      private
 
       def post(path, params = {})
         response = RestClient.post "#{api_url}#{path}", params, headers
@@ -231,19 +231,19 @@ module VagrantPlugins
         raise ApiError::UnauthorizedError
       rescue RestClient::NotImplemented
         raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError
-        raise ApiError::ServerError
+      rescue RestClient::InternalServerError => x
+        raise ApiError::ServerError.new("error while POST #{path}",
+                                        body: x.http_body,
+                                        headers: x.http_headers,
+                                        code: x.http_code,
+                                        message: x.message)
       rescue => x
         raise ApiError::ConnectionError, x.message
       end
 
-      private
-
       def headers
         ticket.nil? ? {} : { CSRFPreventionToken: csrf_token, cookies: { PVEAuthCookie: ticket } }
       end
-
-      private
 
       def is_file_in_storage?(filename: required('filename'), node: required('node'), storage: required('storage'))
         (list_storage_files node: node, storage: storage).find { |f| f =~ /#{File.basename filename}/ }
