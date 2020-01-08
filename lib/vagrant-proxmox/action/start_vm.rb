@@ -27,7 +27,7 @@ module VagrantPlugins
 					retryException = Class.new StandardError
 
 					begin
-						retryable(on: retryException,
+						Retryable.retryable(on: retryException,
 											tries: env[:machine].provider_config.ssh_timeout / env[:machine].provider_config.ssh_status_check_interval + 1,
 											sleep: env[:machine].provider_config.ssh_status_check_interval) do
 							raise retryException unless env[:interrupted] || env[:machine].communicate.ready?

@@ -61,7 +61,7 @@ module VagrantPlugins
         task_type = /UPID:.*?:.*?:.*?:.*?:(.*)?:.*?:.*?:/.match(task_upid)[1]
         timeout = imgcopy_timeout if task_type == 'imgcopy'
         begin
-          retryable(on: VagrantPlugins::Proxmox::ProxmoxTaskNotFinished,
+          Retryable.retryable(on: VagrantPlugins::Proxmox::ProxmoxTaskNotFinished,
                     tries: timeout / task_status_check_interval + 1,
                     sleep: task_status_check_interval) do
             exit_status = get_task_exitstatus task_upid
