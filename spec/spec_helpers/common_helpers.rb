@@ -75,7 +75,9 @@ def unstub_action action_class
 end
 
 def execute_vagrant_command environment, command, *params
-	Vagrant.plugin('2').manager.commands[command].new(params, environment).execute
+	commands = Vagrant.plugin('2').manager.commands
+	task = commands[command].first.call.new(params, environment)
+	task.execute
 end
 
 def up_local_box
