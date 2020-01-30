@@ -103,7 +103,7 @@ end
 
 def add_dummy_box
 	begin
-		Vagrant::Environment.new.boxes.add 'dummy_box/dummy.box', 'b681e2bc-617b-4b35-94fa-edc92e1071b8', :proxmox
+		Vagrant::Environment.new.boxes.add 'dummy_box/dummy.box', 'b681e2bc-617b-4b35-94fa-edc92e1071b8', '0.1.0'
 	rescue Vagrant::Errors::BoxAlreadyExists
 	end
 end
