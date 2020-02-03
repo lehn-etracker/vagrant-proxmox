@@ -313,18 +313,22 @@ module VagrantPlugins
       attr_accessor :lxc_ssh_public_keys
 
       # LXC bwlimit
+      # Override I/O bandwidth limit (in KiB/s).
       # restore limit from datacenter or storage config
       #
       # @return [Integer]
       attr_accessor :lxc_bwlimit
 
       # LXC features
+      # Allow containers access to advanced features.
       # fuse, keyctl, mount, nesting
       #
       # @return [String]
       attr_accessor :lxc_features
 
       # LXC unprivileged
+      # Makes the container run as unprivileged user.
+      # (Should not be modified manually.)
       #
       # @return [Boolean]
       attr_accessor :lxc_unprivileged
