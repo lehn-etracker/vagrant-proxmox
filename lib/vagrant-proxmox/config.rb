@@ -377,6 +377,12 @@ module VagrantPlugins
       # @return [Boolean]
       attr_accessor :lxc_template
 
+      # LXC unique
+      # Assign a unique random ethernet address.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_unique
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -452,6 +458,7 @@ module VagrantPlugins
         @lxc_start = true
         @lxc_tags = UNSET_VALUE
         @lxc_template = false
+        @lxc_unique = false
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
