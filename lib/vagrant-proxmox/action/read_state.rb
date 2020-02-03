@@ -22,7 +22,8 @@ module VagrantPlugins
 							end
 						next_action env
 					rescue => e
-						raise Errors::CommunicationError, error_msg: e.message
+						raise Errors::CommunicationError,
+									error_msg: "ReadState: #{e.message}"
 					end
 
 				end
