@@ -4,6 +4,7 @@
 
 # Ignore bundler config and gem cache
 /.bundle
+/vendor
 /bin
 
 /Vagrantfile

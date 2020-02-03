@@ -57,6 +57,7 @@ namespace :test do
 		require 'rspec/core/rake_task'
 		RSpec::Core::RakeTask.new(:_specs) do |task|
 			task.verbose = false
+			task.rspec_opts = '--fail-fast'
 		end
 		Rake::Task['_specs'].invoke
 	end

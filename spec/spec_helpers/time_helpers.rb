@@ -1,6 +1,6 @@
 require 'timecop'
 
-class Fixnum
+class Integer
 
 	def self.time_interval_converter unit, factor
 		define_method(unit) do
