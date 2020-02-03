@@ -365,6 +365,12 @@ module VagrantPlugins
       # @return [Boolean]
       attr_accessor :lxc_start
 
+      # LXC tags
+      # Tags of the Container. This is only meta information.
+      #
+      # @return [String]
+      attr_accessor :lxc_tags
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -438,6 +444,7 @@ module VagrantPlugins
         @lxc_restore = false
         @lxc_searchdomain = UNSET_VALUE
         @lxc_start = true
+        @lxc_tags = UNSET_VALUE
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
@@ -472,6 +479,7 @@ module VagrantPlugins
         @lxc_force = nil if @lxc_force == UNSET_VALUE
         @lxc_hookscript = nil if @lxc_hookscript == UNSET_VALUE
         @lxc_searchdomain = nil if @lxc_searchdomain == UNSET_VALUE
+        @lxc_tags = nil if @lxc_tags == UNSET_VALUE
       end
 
       def validate(_machine)
