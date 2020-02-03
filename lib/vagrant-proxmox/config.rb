@@ -312,6 +312,12 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :lxc_ssh_public_keys
 
+      # LXC bwlimit
+      # restore limit from datacenter or storage config
+      #
+      # @return [Integer]
+      attr_accessor :lxc_bwlimit
+
       def initialize
         @endpoint = UNSET_VALUE
         @selected_node = UNSET_VALUE
@@ -369,6 +375,7 @@ module VagrantPlugins
         @use_plain_description = false
         @lxc_ssh_public_keys = UNSET_VALUE
         @lxc_cores = UNSET_VALUE
+        @lxc_bwlimit = UNSET_VALUE
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
@@ -397,6 +404,8 @@ module VagrantPlugins
         @lxc_ssh_public_keys = '' if @lxc_ssh_public_keys == UNSET_VALUE
         @lxc_cores = nil if @lxc_cores == UNSET_VALUE
         @lxc_cores = @lxc_cores.to_i unless @lxc_cores.nil?
+        @lxc_bwlimit = nil if @lxc_bwlimit == UNSET_VALUE
+        @lxc_bwlimit = @lxc_bwlimit.to_i unless @lxc_bwlimit.nil?
       end
 
       def validate(_machine)
