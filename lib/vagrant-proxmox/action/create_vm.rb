@@ -117,6 +117,7 @@ module VagrantPlugins
             params['ignore-unpack-errors'] = get_rest_boolean(
               config.lxc_ignore_unpack_errors
             )
+            params[:ostype] = config.lxc_ostype if config.lxc_ostype
             params[:unprivileged] = get_rest_boolean(config.lxc_unprivileged)
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)
