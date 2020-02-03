@@ -112,21 +112,35 @@ module VagrantPlugins
             params[:cores] = config.lxc_cores if config.lxc_cores
             params[:bwlimit] = config.lxc_bwlimit if config.lxc_bwlimit
             params[:features] = config.lxc_features if config.lxc_features
-            params[:force] = get_rest_boolean(config.lxc_force)
+            if config.lxc_force
+              params[:force] = get_rest_boolean(config.lxc_force)
+            end
             params[:hookscript] = config.lxc_hookscript if config.lxc_hookscript
             params['ignore-unpack-errors'] = get_rest_boolean(
               config.lxc_ignore_unpack_errors
-            )
-            params[:ostype] = config.lxc_ostype if config.lxc_ostype
-            params[:unprivileged] = get_rest_boolean(config.lxc_unprivileged)
-            params[:restore] = get_rest_boolean(config.lxc_restore)
+            ) if config.lxc_ignore_unpack_errors
+            if config.lxc_ostype
+              params[:ostype] = config.lxc_ostype if config.lxc_ostype
+            end
+            if config.lxc_unprivileged
+              params[:unprivileged] = get_rest_boolean(config.lxc_unprivileged)
+            end
+            if config.lxc_restore
+              params[:restore] = get_rest_boolean(config.lxc_restore)
+            end
             if config.lxc_searchdomain
               params[:searchdomain] = config.lxc_searchdomain
             end
-            params[:start] = get_rest_boolean(config.lxc_start)
+            if config.lxc_start
+              params[:start] = get_rest_boolean(config.lxc_start)
+            end
             params[:tags] = config.lxc_tags if config.lxc_tags
-            params[:template] =  get_rest_boolean(config.lxc_template)
-            params[:unique] =  get_rest_boolean(config.lxc_unique)
+            if config.lxc_template
+              params[:template] =  get_rest_boolean(config.lxc_template)
+            end
+            if config.lxc_unique
+              params[:unique] =  get_rest_boolean(config.lxc_unique)
+            end
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)
           end
