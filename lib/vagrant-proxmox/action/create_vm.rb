@@ -125,6 +125,7 @@ module VagrantPlugins
             end
             params[:start] = get_rest_boolean(config.lxc_start)
             params[:tags] = config.lxc_tags if config.lxc_tags
+            params[:template] =  get_rest_boolean(config.lxc_template)
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)
           end
