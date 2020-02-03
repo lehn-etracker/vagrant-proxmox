@@ -332,6 +332,13 @@ module VagrantPlugins
       # @return [Boolean]
       attr_accessor :lxc_force
 
+      # LXC hookscript
+      # Script that will be exectued during various steps in the containers
+      # lifetime.
+      #
+      # @return [String]
+      attr_accessor :lxc_hookscript
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -399,6 +406,7 @@ module VagrantPlugins
         @lxc_bwlimit = UNSET_VALUE
         @lxc_features = UNSET_VALUE
         @lxc_force = UNSET_VALUE
+        @lxc_hookscript = UNSET_VALUE
         @lxc_unprivileged = true
       end
 
@@ -432,6 +440,7 @@ module VagrantPlugins
         @lxc_bwlimit = @lxc_bwlimit.to_i unless @lxc_bwlimit.nil?
         @lxc_features = cleanup_lxc_features @lxc_features if @lxc_features
         @lxc_force = nil if @lxc_force == UNSET_VALUE
+        @lxc_hookscript = nil if @lxc_hookscript == UNSET_VALUE
       end
 
       def validate(_machine)
