@@ -112,6 +112,7 @@ module VagrantPlugins
             params[:cores] = config.lxc_cores if config.lxc_cores
             params[:bwlimit] = config.lxc_bwlimit if config.lxc_bwlimit
             params[:features] = config.lxc_features if config.lxc_features
+            params[:force] = get_rest_boolean(config.lxc_force)
             params[:unprivileged] = get_rest_boolean(config.lxc_unprivileged)
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)

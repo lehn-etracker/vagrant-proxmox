@@ -326,6 +326,12 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :lxc_features
 
+      # LXC force
+      # Allow to overwrite existing container.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_force
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -392,6 +398,7 @@ module VagrantPlugins
         @lxc_cores = UNSET_VALUE
         @lxc_bwlimit = UNSET_VALUE
         @lxc_features = UNSET_VALUE
+        @lxc_force = UNSET_VALUE
         @lxc_unprivileged = true
       end
 
@@ -424,6 +431,7 @@ module VagrantPlugins
         @lxc_bwlimit = nil if @lxc_bwlimit == UNSET_VALUE
         @lxc_bwlimit = @lxc_bwlimit.to_i unless @lxc_bwlimit.nil?
         @lxc_features = cleanup_lxc_features @lxc_features if @lxc_features
+        @lxc_force = nil if @lxc_force == UNSET_VALUE
       end
 
       def validate(_machine)
