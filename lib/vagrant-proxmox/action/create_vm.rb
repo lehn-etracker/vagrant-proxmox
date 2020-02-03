@@ -114,6 +114,9 @@ module VagrantPlugins
             params[:features] = config.lxc_features if config.lxc_features
             params[:force] = get_rest_boolean(config.lxc_force)
             params[:hookscript] = config.lxc_hookscript if config.lxc_hookscript
+            params['ignore-unpack-errors'] = get_rest_boolean(
+              config.lxc_ignore_unpack_errors
+            )
             params[:unprivileged] = get_rest_boolean(config.lxc_unprivileged)
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)

@@ -339,6 +339,12 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :lxc_hookscript
 
+      # LXC ignore-unpack-errors
+      # Ignore errors when extracting the template.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_ignore_unpack_errors
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -408,6 +414,7 @@ module VagrantPlugins
         @lxc_force = UNSET_VALUE
         @lxc_hookscript = UNSET_VALUE
         @lxc_unprivileged = true
+        @lxc_ignore_unpack_errors = false
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
