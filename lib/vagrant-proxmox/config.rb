@@ -351,6 +351,14 @@ module VagrantPlugins
       # @return [Boolean]
       attr_accessor :lxc_restore
 
+      # LXC searchdomain
+      # Sets DNS search domains for a container. Create will automatically use
+      # the setting from the host if you neither set searchdomain nor
+      # nameserver.
+      #
+      # @return [String]
+      attr_accessor :lxc_searchdomain
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -422,6 +430,7 @@ module VagrantPlugins
         @lxc_unprivileged = true
         @lxc_ignore_unpack_errors = false
         @lxc_restore = false
+        @lxc_searchdomain = UNSET_VALUE
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
@@ -455,6 +464,7 @@ module VagrantPlugins
         @lxc_features = cleanup_lxc_features @lxc_features if @lxc_features
         @lxc_force = nil if @lxc_force == UNSET_VALUE
         @lxc_hookscript = nil if @lxc_hookscript == UNSET_VALUE
+        @lxc_searchdomain = nil if @lxc_searchdomain == UNSET_VALUE
       end
 
       def validate(_machine)
