@@ -281,12 +281,12 @@ module VagrantPlugins
                            c[:volume].to_s
                          end
             # translate booleans
-            %i(acl backup quota ro shared).each do |k|
+            %i(acl backup quota replicate ro shared).each do |k|
               c[k] = get_rest_boolean(c[k]) unless c[k] == -1
             end
             # build config string
             cs = []
-            %i(volume mp acl backup quota ro).each do |k|
+            %i(volume mp acl backup quota replicate ro shared).each do |k|
               cs.push("#{k}=#{c[k]}") unless c[k] == -1
             end
             # add size if it is zero
