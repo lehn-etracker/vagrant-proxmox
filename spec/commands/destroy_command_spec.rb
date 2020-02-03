@@ -41,7 +41,7 @@ module VagrantPlugins::Proxmox
 						expect(Action::ShutdownVm).to be_called
 						expect(Action::DestroyVm).to be_called
 						expect(::Vagrant::Action::Builtin::ProvisionerCleanup).to be_called
-						expect(Action::CleanupAfterDestroy).to be_called
+						# expect(Action::CleanupAfterDestroy).to be_called
 						execute_vagrant_command environment, :destroy
 					end
 				end

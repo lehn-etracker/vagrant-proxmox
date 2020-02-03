@@ -184,6 +184,11 @@ module VagrantPlugins
       # @return [Integer]
       attr_accessor :lxc_cpulimit
 
+      # LXC Cores
+      #
+      # @return [Integer]
+      attr_accessor :lxc_cores
+
       # LXC CPU weight for a VM.
       # Argument is used in the kernel fair scheduler. The larger the number is,
       # the more CPU time this VM gets. Number is relative to the weights of all
@@ -307,6 +312,84 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :lxc_ssh_public_keys
 
+      # LXC bwlimit
+      # Override I/O bandwidth limit (in KiB/s).
+      # restore limit from datacenter or storage config
+      #
+      # @return [Integer]
+      attr_accessor :lxc_bwlimit
+
+      # LXC features
+      # Allow containers access to advanced features.
+      # fuse, keyctl, mount, nesting
+      #
+      # @return [String]
+      attr_accessor :lxc_features
+
+      # LXC force
+      # Allow to overwrite existing container.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_force
+
+      # LXC hookscript
+      # Script that will be exectued during various steps in the containers
+      # lifetime.
+      #
+      # @return [String]
+      attr_accessor :lxc_hookscript
+
+      # LXC ignore-unpack-errors
+      # Ignore errors when extracting the template.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_ignore_unpack_errors
+
+      # LXC restore
+      # Mark this as restore task.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_restore
+
+      # LXC searchdomain
+      # Sets DNS search domains for a container. Create will automatically use
+      # the setting from the host if you neither set searchdomain nor
+      # nameserver.
+      #
+      # @return [String]
+      attr_accessor :lxc_searchdomain
+
+      # LXC start
+      # Start the CT after its creation finished successfully.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_start
+
+      # LXC tags
+      # Tags of the Container. This is only meta information.
+      #
+      # @return [String]
+      attr_accessor :lxc_tags
+
+      # LXC template
+      # Tags of the Container. This is only meta information.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_template
+
+      # LXC unique
+      # Assign a unique random ethernet address.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_unique
+
+      # LXC unprivileged
+      # Makes the container run as unprivileged user.
+      # (Should not be modified manually.)
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_unprivileged
+
       def initialize
         @endpoint = UNSET_VALUE
         @selected_node = UNSET_VALUE
@@ -363,6 +446,19 @@ module VagrantPlugins
         @description = UNSET_VALUE
         @use_plain_description = false
         @lxc_ssh_public_keys = UNSET_VALUE
+        @lxc_cores = UNSET_VALUE
+        @lxc_bwlimit = UNSET_VALUE
+        @lxc_features = UNSET_VALUE
+        @lxc_force = UNSET_VALUE
+        @lxc_hookscript = UNSET_VALUE
+        @lxc_unprivileged = true
+        @lxc_ignore_unpack_errors = false
+        @lxc_restore = false
+        @lxc_searchdomain = UNSET_VALUE
+        @lxc_start = false
+        @lxc_tags = UNSET_VALUE
+        @lxc_template = false
+        @lxc_unique = false
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
@@ -389,6 +485,15 @@ module VagrantPlugins
         @pool = 'all' if @pool == UNSET_VALUE
         @description = '' if @description == UNSET_VALUE
         @lxc_ssh_public_keys = '' if @lxc_ssh_public_keys == UNSET_VALUE
+        @lxc_cores = nil if @lxc_cores == UNSET_VALUE
+        @lxc_cores = @lxc_cores.to_i unless @lxc_cores.nil?
+        @lxc_bwlimit = nil if @lxc_bwlimit == UNSET_VALUE
+        @lxc_bwlimit = @lxc_bwlimit.to_i unless @lxc_bwlimit.nil?
+        @lxc_features = cleanup_lxc_features @lxc_features if @lxc_features
+        @lxc_force = nil if @lxc_force == UNSET_VALUE
+        @lxc_hookscript = nil if @lxc_hookscript == UNSET_VALUE
+        @lxc_searchdomain = nil if @lxc_searchdomain == UNSET_VALUE
+        @lxc_tags = nil if @lxc_tags == UNSET_VALUE
       end
 
       def validate(_machine)
@@ -413,6 +518,12 @@ module VagrantPlugins
             %w[tty shell console].include?(@lxc_cmode)
           errors << I18n.t('vagrant_proxmox.errors.lxc_no_valid_tty') unless \
             @lxc_tty.is_a?(Integer)
+            unless @lxc_cores.nil?
+              unless 0 < @lxc_cores and @lxc_cores <= 128
+                errors << I18n.t('vagrant_proxmox.errors.lxc_invalid_cores',
+                                  value: @lxc_cores)
+              end
+            end
         end
         { 'Proxmox Provider' => errors }
       end
@@ -426,6 +537,23 @@ module VagrantPlugins
         else
           disk_size
         end
+      end
+
+      def cleanup_lxc_features(lxc_features)
+        clean_features = {}
+        return nil if lxc_features.to_s.empty?
+        return nil if lxc_features == UNSET_VALUE
+        # parse feature string supplied
+        lxc_features_h = lxc_features.split(',').map do |o|
+          x = o.split('=')
+          {x[0] => x[1]}
+        end.inject(:merge)
+        # filter invalid values
+        %w[fuse keyctl nesting mount].each do |f|
+          clean_features[f] = lxc_features_h[f] if lxc_features_h.include?(f)
+        end
+        # convert back to string
+        clean_features.map {|k,v| "#{k}=#{v}" }.join(',')
       end
     end
   end

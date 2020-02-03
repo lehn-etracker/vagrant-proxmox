@@ -199,8 +199,8 @@ module VagrantPlugins
         JSON.parse response.to_s, symbolize_names: true
       rescue RestClient::NotImplemented
         raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError
-        raise ApiError::ServerError
+      rescue RestClient::InternalServerError => x
+        raise ApiError::ServerError, "#{x.message} for GET #{api_url}#{path}"
       rescue RestClient::Unauthorized
         raise ApiError::UnauthorizedError
       rescue => x
@@ -216,8 +216,8 @@ module VagrantPlugins
         raise ApiError::UnauthorizedError
       rescue RestClient::NotImplemented
         raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError
-        raise ApiError::ServerError
+      rescue RestClient::InternalServerError => x
+        raise ApiError::ServerError, "#{x.message} for DELETE #{api_url}#{path}"
       rescue => x
         raise ApiError::ConnectionError, x.message
       end
@@ -231,8 +231,8 @@ module VagrantPlugins
         raise ApiError::UnauthorizedError
       rescue RestClient::NotImplemented
         raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError
-        raise ApiError::ServerError
+      rescue RestClient::InternalServerError => x
+        raise ApiError::ServerError, "#{x.message} for POST #{api_url}#{path}"
       rescue => x
         raise ApiError::ConnectionError, x.message
       end

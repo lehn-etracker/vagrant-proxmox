@@ -22,7 +22,8 @@ module VagrantPlugins
 						connection.login username: config.user_name, password: config.password
 						env[:proxmox_connection] = connection
 					rescue => e
-						raise Errors::CommunicationError, error_msg: e.message
+						raise Errors::CommunicationError,
+									error_msg: "ConnectProxmox: #{e.message}"
 					end
 					next_action env
 				end

@@ -15,7 +15,8 @@ module VagrantPlugins
 						env[:proxmox_nodes] = env[:proxmox_connection].get_node_list
 						next_action env
 					rescue => e
-						raise Errors::CommunicationError, error_msg: e.message
+						raise Errors::CommunicationError,
+									error_msg: "GetNodeList: #{e.message}"
 					end
 				end
 

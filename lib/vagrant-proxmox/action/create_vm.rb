@@ -109,6 +109,38 @@ module VagrantPlugins
             params[:onboot] = get_rest_boolean(config.lxc_onboot)
             params[:protection] = get_rest_boolean(config.lxc_protection)
             params[:console] = get_rest_boolean(config.lxc_console)
+            params[:cores] = config.lxc_cores if config.lxc_cores
+            params[:bwlimit] = config.lxc_bwlimit if config.lxc_bwlimit
+            params[:features] = config.lxc_features if config.lxc_features
+            if config.lxc_force
+              params[:force] = get_rest_boolean(config.lxc_force)
+            end
+            params[:hookscript] = config.lxc_hookscript if config.lxc_hookscript
+            params['ignore-unpack-errors'] = get_rest_boolean(
+              config.lxc_ignore_unpack_errors
+            ) if config.lxc_ignore_unpack_errors
+            if config.lxc_ostype
+              params[:ostype] = config.lxc_ostype if config.lxc_ostype
+            end
+            if config.lxc_unprivileged
+              params[:unprivileged] = get_rest_boolean(config.lxc_unprivileged)
+            end
+            if config.lxc_restore
+              params[:restore] = get_rest_boolean(config.lxc_restore)
+            end
+            if config.lxc_searchdomain
+              params[:searchdomain] = config.lxc_searchdomain
+            end
+            if config.lxc_start
+              params[:start] = get_rest_boolean(config.lxc_start)
+            end
+            params[:tags] = config.lxc_tags if config.lxc_tags
+            if config.lxc_template
+              params[:template] =  get_rest_boolean(config.lxc_template)
+            end
+            if config.lxc_unique
+              params[:unique] =  get_rest_boolean(config.lxc_unique)
+            end
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)
           end
