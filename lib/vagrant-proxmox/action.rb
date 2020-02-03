@@ -145,7 +145,7 @@ module VagrantPlugins
 									b3.use ShutdownVm unless env3[:result]
 									b3.use DestroyVm
 									b3.use ::Vagrant::Action::Builtin::ProvisionerCleanup
-									b3.use CleanupAfterDestroy
+									# b3.use CleanupAfterDestroy
 								end
 							else
 								b2.use ::VagrantPlugins::ProviderVirtualBox::Action::MessageWillNotDestroy
@@ -229,7 +229,7 @@ module VagrantPlugins
 		autoload :StopVm, action_root.join('stop_vm')
 		autoload :ShutdownVm, action_root.join('shutdown_vm')
 		autoload :DestroyVm, action_root.join('destroy_vm')
-		autoload :CleanupAfterDestroy, action_root.join('cleanup_after_destroy')
+		# autoload :CleanupAfterDestroy, action_root.join('cleanup_after_destroy')
 		autoload :ReadSSHInfo, action_root.join('read_ssh_info')
 		autoload :SyncFolders, action_root.join('sync_folders')
 		autoload :UploadTemplateFile, action_root.join('upload_template_file')
