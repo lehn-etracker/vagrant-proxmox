@@ -119,6 +119,7 @@ module VagrantPlugins
             )
             params[:ostype] = config.lxc_ostype if config.lxc_ostype
             params[:unprivileged] = get_rest_boolean(config.lxc_unprivileged)
+            params[:restore] = get_rest_boolean(config.lxc_restore)
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)
           end

@@ -345,6 +345,12 @@ module VagrantPlugins
       # @return [Boolean]
       attr_accessor :lxc_ignore_unpack_errors
 
+      # LXC restore
+      # Mark this as restore task.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_restore
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -415,6 +421,7 @@ module VagrantPlugins
         @lxc_hookscript = UNSET_VALUE
         @lxc_unprivileged = true
         @lxc_ignore_unpack_errors = false
+        @lxc_restore = false
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
