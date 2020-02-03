@@ -318,6 +318,12 @@ module VagrantPlugins
       # @return [Integer]
       attr_accessor :lxc_bwlimit
 
+      # LXC features
+      # fuse, keyctl, mount, nesting
+      #
+      # @return [String]
+      attr_accessor :lxc_features
+
       # LXC unprivileged
       #
       # @return [Boolean]
@@ -381,6 +387,7 @@ module VagrantPlugins
         @lxc_ssh_public_keys = UNSET_VALUE
         @lxc_cores = UNSET_VALUE
         @lxc_bwlimit = UNSET_VALUE
+        @lxc_features = UNSET_VALUE
         @lxc_unprivileged = true
       end
 
@@ -412,6 +419,7 @@ module VagrantPlugins
         @lxc_cores = @lxc_cores.to_i unless @lxc_cores.nil?
         @lxc_bwlimit = nil if @lxc_bwlimit == UNSET_VALUE
         @lxc_bwlimit = @lxc_bwlimit.to_i unless @lxc_bwlimit.nil?
+        @lxc_features = cleanup_lxc_features @lxc_features if @lxc_features
       end
 
       def validate(_machine)
@@ -455,6 +463,23 @@ module VagrantPlugins
         else
           disk_size
         end
+      end
+
+      def cleanup_lxc_features(lxc_features)
+        clean_features = {}
+        return nil if lxc_features.to_s.empty?
+        return nil if lxc_features == UNSET_VALUE
+        # parse feature string supplied
+        lxc_features_h = lxc_features.split(',').map do |o|
+          x = o.split('=')
+          {x[0] => x[1]}
+        end.inject(:merge)
+        # filter invalid values
+        %w[fuse keyctl nesting mount].each do |f|
+          clean_features[f] = lxc_features_h[f] if lxc_features_h.include?(f)
+        end
+        # convert back to string
+        clean_features.map {|k,v| "#{k}=#{v}" }.join(',')
       end
     end
   end
