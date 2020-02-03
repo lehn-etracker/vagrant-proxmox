@@ -455,7 +455,7 @@ module VagrantPlugins
         @lxc_ignore_unpack_errors = false
         @lxc_restore = false
         @lxc_searchdomain = UNSET_VALUE
-        @lxc_start = true
+        @lxc_start = false
         @lxc_tags = UNSET_VALUE
         @lxc_template = false
         @lxc_unique = false
