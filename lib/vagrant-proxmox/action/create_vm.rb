@@ -109,6 +109,7 @@ module VagrantPlugins
             params[:onboot] = get_rest_boolean(config.lxc_onboot)
             params[:protection] = get_rest_boolean(config.lxc_protection)
             params[:console] = get_rest_boolean(config.lxc_console)
+            params[:cores] = config.lxc_cores if config.lxc_cores
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)
           end

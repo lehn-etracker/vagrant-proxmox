@@ -17,6 +17,9 @@ en:
       Network config will be ignored, because it isn't supported by proxmox.
         Config: %{net_config}
     errors:
+      lxc_invalid_cores: >-
+        Invalid LXC/PCT setting for lxc_cores (value: %{value}): It has to be
+        between 1 and 128.
       create_vm_timeout: |-
         Creating the vm on the proxmox server timed out.
       communication_error: |-

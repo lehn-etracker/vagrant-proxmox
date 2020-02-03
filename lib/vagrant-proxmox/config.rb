@@ -184,6 +184,11 @@ module VagrantPlugins
       # @return [Integer]
       attr_accessor :lxc_cpulimit
 
+      # LXC Cores
+      #
+      # @return [Integer]
+      attr_accessor :lxc_cores
+
       # LXC CPU weight for a VM.
       # Argument is used in the kernel fair scheduler. The larger the number is,
       # the more CPU time this VM gets. Number is relative to the weights of all
@@ -363,6 +368,7 @@ module VagrantPlugins
         @description = UNSET_VALUE
         @use_plain_description = false
         @lxc_ssh_public_keys = UNSET_VALUE
+        @lxc_cores = UNSET_VALUE
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
@@ -389,6 +395,8 @@ module VagrantPlugins
         @pool = 'all' if @pool == UNSET_VALUE
         @description = '' if @description == UNSET_VALUE
         @lxc_ssh_public_keys = '' if @lxc_ssh_public_keys == UNSET_VALUE
+        @lxc_cores = nil if @lxc_cores == UNSET_VALUE
+        @lxc_cores = @lxc_cores.to_i unless @lxc_cores.nil?
       end
 
       def validate(_machine)
@@ -413,6 +421,12 @@ module VagrantPlugins
             %w[tty shell console].include?(@lxc_cmode)
           errors << I18n.t('vagrant_proxmox.errors.lxc_no_valid_tty') unless \
             @lxc_tty.is_a?(Integer)
+            unless @lxc_cores.nil?
+              unless 0 < @lxc_cores and @lxc_cores <= 128
+                errors << I18n.t('vagrant_proxmox.errors.lxc_invalid_cores',
+                                  value: @lxc_cores)
+              end
+            end
         end
         { 'Proxmox Provider' => errors }
       end
