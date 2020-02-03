@@ -318,6 +318,11 @@ module VagrantPlugins
       # @return [Integer]
       attr_accessor :lxc_bwlimit
 
+      # LXC unprivileged
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_unprivileged
+
       def initialize
         @endpoint = UNSET_VALUE
         @selected_node = UNSET_VALUE
@@ -376,6 +381,7 @@ module VagrantPlugins
         @lxc_ssh_public_keys = UNSET_VALUE
         @lxc_cores = UNSET_VALUE
         @lxc_bwlimit = UNSET_VALUE
+        @lxc_unprivileged = true
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
