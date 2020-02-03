@@ -123,6 +123,7 @@ module VagrantPlugins
             if config.lxc_searchdomain
               params[:searchdomain] = config.lxc_searchdomain
             end
+            params[:start] = get_rest_boolean(config.lxc_start)
             add_lxc_network_config(env, params)
             add_lxc_mount_points(env, config, params)
           end

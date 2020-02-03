@@ -359,6 +359,12 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :lxc_searchdomain
 
+      # LXC start
+      # Start the CT after its creation finished successfully.
+      #
+      # @return [Boolean]
+      attr_accessor :lxc_start
+
       # LXC unprivileged
       # Makes the container run as unprivileged user.
       # (Should not be modified manually.)
@@ -431,6 +437,7 @@ module VagrantPlugins
         @lxc_ignore_unpack_errors = false
         @lxc_restore = false
         @lxc_searchdomain = UNSET_VALUE
+        @lxc_start = true
       end
 
       # This is the hook that is called to finalize the object before it is put into use.
