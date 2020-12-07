@@ -170,6 +170,28 @@ module VagrantPlugins
         :not_created
       end
 
+      def qemu_agent_ping(node, vm_id)
+        post "/nodes/#{node}/qemu/#{vm_id}/agent", command: "ping"
+        true
+      rescue ApiError::ServerError
+        false
+      end
+
+      def qemu_agent_get_vm_ip(node, vm_id)
+        if not qemu_agent_ping(node, vm_id)
+          nil
+        end
+
+        response = post "/nodes/#{node}/qemu/#{vm_id}/agent", command: "network-get-interfaces"
+        response[:data][:result]
+          .select { |iface| iface[:name] != 'lo' }
+          .map { |iface| iface[:'ip-addresses'] }
+          .flatten
+          .select { |ip| ip[:'ip-address-type'] == 'ipv4' }
+          .map { |ip| ip[:'ip-address'] }
+          .first
+      end
+
       # This is called every time to retrieve the node and vm_type, hence on large
       # installations this could be a huge amount of data. Probably an optimization
       # with a buffer for the machine info could be considered.

@@ -20,8 +20,6 @@ module VagrantPlugins
 						raise VagrantPlugins::Proxmox::Errors::VMStartError, proxmox_exit_status: e.message
 					end
 
-					env[:ui].info I18n.t('vagrant_proxmox.done')
-
 					env[:ui].info I18n.t('vagrant_proxmox.waiting_for_ssh_connection')
 
 					retryException = Class.new StandardError
@@ -35,8 +33,6 @@ module VagrantPlugins
 					rescue retryException
 						raise VagrantPlugins::Proxmox::Errors::SSHError
 					end
-
-					env[:ui].info I18n.t('vagrant_proxmox.done')
 
 					next_action env
 				end

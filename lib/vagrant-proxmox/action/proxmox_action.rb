@@ -12,8 +12,15 @@ module VagrantPlugins
         def get_machine_ip_address(env)
           config = env[:machine].provider_config
           if config.vm_type == :qemu
-            env[:machine].config.vm.networks.select \
-              { |type, _| type == :forwarded_port }.first[1][:host_ip] || nil
+            ips = env[:machine].config.vm.networks.select {
+              |type, iface| type == :forwarded_port and iface[:host_ip] != "127.0.0.1"
+            }
+            return ips.first[1][:host_ip] if not ips.empty?
+
+            node = env[:proxmox_selected_node]
+            vm_id = env[:machine].id.split("/").last
+
+            connection(env).qemu_agent_get_vm_ip(node, vm_id)
           else
             env[:machine].config.vm.networks.select \
               { |type, _| type == :public_network }.first[1][:ip] || nil

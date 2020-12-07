@@ -172,6 +172,12 @@ module VagrantPlugins
       # @return [String]
       attr_accessor :qemu_cache
 
+      # Enables the qemu agent endpoint.
+      # defaults to false
+      #
+      # @return [Boolean]
+      attr_accessor :qemu_agent
+
       # disable ssh port adjustments
       #
       # @return [Boolean]
@@ -390,6 +396,19 @@ module VagrantPlugins
       # @return [Boolean]
       attr_accessor :lxc_unprivileged
 
+      # Appends VM ID to the guest hostname.
+      # defaults to false
+      #
+      # @return [Boolean]
+      attr_accessor :hostname_append_id
+
+      # Creates full clone, instead of linked one.
+      # defaults to false
+      #
+      # @return [Boolean]
+      attr_accessor :full_clone
+
+
       def initialize
         @endpoint = UNSET_VALUE
         @selected_node = UNSET_VALUE
@@ -423,7 +442,8 @@ module VagrantPlugins
         @qemu_bridge = 'vmbr0'
         @qemu_disk_format = 'qcow2'
         @qemu_cache = 'none'
-        @disable_adjust_forwarded_port = false
+        @qemu_agent = false
+        @disable_adjust_forwarded_port = true
         @lxc_cpulimit = 0
         @lxc_cpuunits = 1024
         @lxc_mount_points = {}
@@ -459,6 +479,8 @@ module VagrantPlugins
         @lxc_tags = UNSET_VALUE
         @lxc_template = false
         @lxc_unique = false
+        @hostname_append_id = false
+        @full_clone = false
       end
 
       # This is the hook that is called to finalize the object before it is put into use.

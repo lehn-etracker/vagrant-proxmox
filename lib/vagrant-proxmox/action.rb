@@ -34,6 +34,7 @@ module VagrantPlugins
 							b1.use GetNodeList
 							b1.use SelectNode
 							b1.use Provision
+							b1.use SetHostname
 							if env1[:machine].provider_config.vm_type == :openvz
 								b1.use Call, UploadTemplateFile do |env2, b2|
 									if env2[:result] == :ok
@@ -122,7 +123,7 @@ module VagrantPlugins
 								b2.use MessageAlreadyStopped
 							else
 								b2.use ConnectProxmox
-								b2.use ShutdownVm
+								b2.use env2[:force_halt] ? StopVm : ShutdownVm
 							end
 						end
 					else
@@ -142,7 +143,7 @@ module VagrantPlugins
 						b1.use Call, ::Vagrant::Action::Builtin::DestroyConfirm do |env2, b2|
 							if env2[:result]
 								b2.use Call, IsStopped do |env3, b3|
-									b3.use ShutdownVm unless env3[:result]
+									b3.use StopVm unless env3[:result]
 									b3.use DestroyVm
 									b3.use ::Vagrant::Action::Builtin::ProvisionerCleanup
 									# b3.use CleanupAfterDestroy
@@ -194,9 +195,9 @@ module VagrantPlugins
 				b.use Call, IsCreated do |env1, b1|
 					if env1[:result]
 						b1.use Call, IsStopped do |env2, b2|
-              if env2[:result]
+							if env2[:result]
 								b2.use MessageNotRunning
-              else
+							else
 								b2.use SSHRun
 							end
 						end
@@ -235,6 +236,6 @@ module VagrantPlugins
 		autoload :UploadTemplateFile, action_root.join('upload_template_file')
 		autoload :UploadIsoFile, action_root.join('upload_iso_file')
 
+		end
 	end
-end
 end
