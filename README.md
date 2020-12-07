@@ -28,8 +28,6 @@ and provision Proxmox virtual machines.
 
 ## Installation
 
-Download `gem` file from https://github.com/DataxPL/vagrant-proxmox/releases.
-
 Install using standard Vagrant plugin method:
 
 ```
@@ -111,7 +109,7 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = 'proxmox'
 ```
 
 ## Options
-
+* `dry` Dont actually send data to the server.
 * `endpoint` URL of the JSON API endpoint of your Proxmox installation
 * `user_name` The name of the Proxmox user that Vagrant should use
 * `password` The password of the above user
@@ -147,6 +145,7 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = 'proxmox'
 * `pool` Resource pool to use.
 * `hostname_append_id` Appends guest ID to its' hostname. Note that this effectively sets the hostname to ID, if it was empty beforehand.
 * `full_clone` Creates full clone, instead of a linked one.
+* `lxc_ssh_public_keys` public keys to be added to the authorized keys file of the machine, one key per line.
 
 ## Debug RestClient Communication with Proxmox-Node
 
@@ -158,7 +157,7 @@ $ RESTCLIENT_LOG=stdout vagrant up --provider proxmox
 
 ### Tips
 
-* ensure your LXC-template is accessible from every proxmox node
+* ensure your LXC-template is accessable from every proxmox node
 * debug with `selected_node`-option enabled
 
 ## Build the plugin
@@ -171,11 +170,18 @@ $ rake build
 
 For non-ruby folks. Needs `ruby` and `zlib` development headers (on Debian: `apt-get install ruby-dev zlib1g-dev`).
 
+Use e.g. rvm to manage ruby versions. Do `rvm install "ruby-2.5.7"` to install the appropiate ruby version. Run `rvm use` then and check with `ruby --version` if it was properly activated. (If ruby complains about not using a login shell run `source ~/.rvm/scripts/rvm`)
+
+You may then install dependencies and build with: 
 ```bash
-$ export GEM_HOME=~/.gem
 $ gem install bundler rake
-$ ~/.gem/bin/bundle
+$ bundle install
 $ rake build
+```
+
+You can install the vagrant plugin then with `vagrant plugin install ./vagrant-proxmox-0.2.2.gem` (you might run into problems if you run it on a shell where you ran `rvm use` previously).
+
+Optionally run the rspec tests with `rake spec`. (Make sure, that vagrant is installed in the ruby env you are using.)
 
 Optionally run the rspec tests with
 
