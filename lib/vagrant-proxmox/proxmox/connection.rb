@@ -22,6 +22,7 @@ module VagrantPlugins
         @task_timeout = opts[:task_timeout] || 60
         @task_status_check_interval = opts[:task_status_check_interval] || 2
         @imgcopy_timeout = opts[:imgcopy_timeout] || 120
+        @logger = Log4r::Logger.new 'vagrant_proxmox::Connection'
       end
 
       def login(username: required('username'), password: required('password'))
@@ -79,6 +80,10 @@ module VagrantPlugins
       end
 
       def create_vm(node: required('node'), vm_type: required('node'), params: required('params'))
+        if not params.key? :vmid
+          raise VagrantPlugins::Proxmox::Errors::VMCreateError,
+                proxmox_exit_status: 'No vmid set for creating the vm'
+        end
         response = post "/nodes/#{node}/#{vm_type}", params
         wait_for_completion task_response: response, timeout_message: 'vagrant_proxmox.errors.create_vm_timeout'
       end
@@ -135,8 +140,11 @@ module VagrantPlugins
         response = get '/cluster/resources?type=vm'
         allowed_vm_ids = vm_id_range.to_set
         used_vm_ids = response[:data].map { |vm| vm[:vmid] }
+        @logger.debug "Used vm ids: #{used_vm_ids.inspect}"
         free_vm_ids = (allowed_vm_ids - used_vm_ids).sort
         free_vm_ids.empty? ? raise(VagrantPlugins::Proxmox::Errors::NoVmIdAvailable) : free_vm_ids.first
+        @logger.info "Choosing VM id: #{free_vm_ids.first}"
+        free_vm_ids.first
       end
 
       def get_qemu_template_id(template)
@@ -206,66 +214,51 @@ module VagrantPlugins
           .first
       end
 
-      private
-
       def get_task_exitstatus(task_upid)
         node = /UPID:(.*?):/.match(task_upid)[1]
         response = get "/nodes/#{node}/tasks/#{task_upid}/status"
         response[:data][:exitstatus]
       end
 
-      private
-
       def get(path)
-        response = RestClient.get "#{api_url}#{path}", cookies: { PVEAuthCookie: ticket }
-        JSON.parse response.to_s, symbolize_names: true
-      rescue RestClient::NotImplemented
-        raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError => x
-        raise ApiError::ServerError, "#{x.message} for GET #{api_url}#{path}"
-      rescue RestClient::Unauthorized
-        raise ApiError::UnauthorizedError
-      rescue => x
-        raise ApiError::ConnectionError, x.message
+        handle_network_request "GET", path do
+          @logger.debug "GET #{path}"
+          response = RestClient.get "#{api_url}#{path}", cookies: { PVEAuthCookie: ticket }
+          JSON.parse response.to_s, symbolize_names: true
+        end
       end
-
-      private
 
       def delete(path, _params = {})
-        response = RestClient.delete "#{api_url}#{path}", headers
-        JSON.parse response.to_s, symbolize_names: true
-      rescue RestClient::Unauthorized
-        raise ApiError::UnauthorizedError
-      rescue RestClient::NotImplemented
-        raise ApiError::NotImplemented
-      rescue RestClient::InternalServerError => x
-        raise ApiError::ServerError, "#{x.message} for DELETE #{api_url}#{path}"
-      rescue => x
-        raise ApiError::ConnectionError, x.message
+        handle_network_request "DELETE", path do
+          @logger.debug("DELETE: #{path}")
+          response = RestClient.delete "#{api_url}#{path}", headers
+          JSON.parse response.to_s, symbolize_names: true
+        end
       end
-
-      private
 
       def post(path, params = {})
-        response = RestClient.post "#{api_url}#{path}", params, headers
-        JSON.parse response.to_s, symbolize_names: true
+        handle_network_request "POST", path do
+          @logger.debug("POST: #{path}")
+          response = RestClient.post "#{api_url}#{path}", params, headers
+          JSON.parse response.to_s, symbolize_names: true
+        end
+      end
+
+      def handle_network_request(action, path)
+        yield
       rescue RestClient::Unauthorized
         raise ApiError::UnauthorizedError
       rescue RestClient::NotImplemented
         raise ApiError::NotImplemented
       rescue RestClient::InternalServerError => x
-        raise ApiError::ServerError, "#{x.message} for POST #{api_url}#{path}"
+        raise ApiError::ServerError, "#{x.message} for #{action} #{api_url}#{path}"
       rescue => x
         raise ApiError::ConnectionError, x.message
       end
-
-      private
 
       def headers
         ticket.nil? ? {} : { CSRFPreventionToken: csrf_token, cookies: { PVEAuthCookie: ticket } }
       end
-
-      private
 
       def is_file_in_storage?(filename: required('filename'), node: required('node'), storage: required('storage'))
         (list_storage_files node: node, storage: storage).find { |f| f =~ /#{File.basename filename}/ }
