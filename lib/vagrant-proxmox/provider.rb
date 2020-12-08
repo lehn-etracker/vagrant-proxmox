@@ -17,12 +17,18 @@ module VagrantPlugins
 			end
 
 			def state
-				# Run a custom action we define called "read_state" which does
-				# what it says. It puts the state in the `:machine_state_id`
-				# key in the environment.
-				env = @machine.action 'read_state'
-
-				state_id = env[:machine_state_id]
+				if !Dir.exist?(@machine.data_dir)
+					# When the machine was destroyed and data dir cleaned up,
+					# we cannot run any actions anymore.
+					# So assume that the machine is really no more.
+					state_id = "not_created"
+				else
+					# Run a custom action we define called "read_state" which does
+					# what it says. It puts the state in the `:machine_state_id`
+					# key in the environment.
+					env = @machine.action 'read_state'
+					state_id = env[:machine_state_id]
+				end
 
 				# Get the short and long description
 				short = I18n.t "vagrant_proxmox.states.short_#{state_id}"

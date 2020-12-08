@@ -24,9 +24,13 @@ module VagrantPlugins
 					rescue StandardError => e
 						raise VagrantPlugins::Proxmox::Errors::VMCloneError, proxmox_exit_status: e.message
 					end
-	
+
 					begin
 						vm_id = connection(env).get_free_vm_id
+						if config.hostname_append_id
+							hostname = env[:machine].config.vm.hostname
+							env[:machine].config.vm.hostname = "#{hostname}#{vm_id}"
+						end
 						params = create_params_qemu(config, env, vm_id, template_vm_id)
 						exit_status = connection(env).clone_vm node: node, vm_type: config.vm_type, params: params
 						exit_status == 'OK' ? exit_status : raise(VagrantPlugins::Proxmox::Errors::ProxmoxTaskFailed, proxmox_exit_status: exit_status)
@@ -36,17 +40,20 @@ module VagrantPlugins
 
 					env[:machine].id = "#{node}/#{vm_id}"
 
-					env[:ui].info I18n.t('vagrant_proxmox.done')
 					next_action env
 				end
 
 				private
 				def create_params_qemu(config, env, vm_id, template_vm_id)
 					# without network, which will added in ConfigClonedVm
-					{vmid: template_vm_id,
-					 newid: vm_id,
-					 name: env[:machine].config.vm.hostname || env[:machine].name.to_s,
-					 description: "#{config.vm_name_prefix}#{env[:machine].name}"}
+					{
+						vmid: template_vm_id,
+						newid: vm_id,
+						name: env[:machine].config.vm.hostname || env[:machine].name.to_s,
+						description: "#{config.vm_name_prefix}#{env[:machine].name}",
+						pool: config.pool,
+						full: get_rest_boolean(config.full_clone),
+					}
 				end
 
 			end

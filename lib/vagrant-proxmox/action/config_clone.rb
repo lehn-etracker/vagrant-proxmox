@@ -1,94 +1,52 @@
 module VagrantPlugins
 	module Proxmox
 		module Action
-
 			# This action modifies the configuration of a cloned vm
-			# Basically it creates a user network interface with hostfwd for the provisioning
-			# and an interface for every public or private interface defined in the Vagrantfile
+			# It applies only a subset of the whole configuration, excluding storage
+			# and network options, which are inherited from the base template.
 			class ConfigClone < ProxmoxAction
 
 				def initialize app, env
 					@app = app
 					@logger = Log4r::Logger.new 'vagrant_proxmox::action::config_clone'
-					@node_ip = nil
-					@guest_port = nil
 				end
 
 				def call env
 					env[:ui].info I18n.t('vagrant_proxmox.configuring_vm')
 					config = env[:machine].provider_config
 					node = env[:proxmox_selected_node]
-					vm_id = nil
+					vm_id = env[:machine].id.split("/").last
 
+					params = create_params_qemu(config, env, vm_id)
 					begin
-						vm_id = env[:machine].id.split("/").last
-						@node_ip = connection(env).get_node_ip(node, 'vmbr0') if config.vm_type == :qemu
-						@guest_port = sprintf("22%03d", vm_id.to_i).to_s
-					rescue StandardError => e
-						raise VagrantPlugins::Proxmox::Errors::VMConfigError, proxmox_exit_status: e.message
-					end
-
-					begin
-						template_config = connection(env).get_vm_config node: node, vm_id: vm_id, vm_type: config.vm_type
-						params = create_params_qemu(config, env, vm_id, template_config)
 						exit_status = connection(env).config_clone node: node, vm_type: config.vm_type, params: params
 						exit_status == 'OK' ? exit_status : raise(VagrantPlugins::Proxmox::Errors::ProxmoxTaskFailed, proxmox_exit_status: exit_status)
 					rescue StandardError => e
-						raise VagrantPlugins::Proxmox::Errors::VMConfigError, proxmox_exit_status: e.message
+						raise VagrantPlugins::Proxmox::Errors::VMConfigError, error_msg: e.message
 					end
 
-					env[:ui].info I18n.t('vagrant_proxmox.done')
 					next_action env
 				end
 
 				private
-				def create_params_qemu(provider_config, env, vm_id, template_config)
-					vm_config = env[:machine].config.vm
+				def create_params_qemu(config, env, vm_id)
+					desc = if config.use_plain_description
+						config.description
+					else
+						"#{config.vm_name_prefix}#{env[:machine].name}:#{config.description}"
+					end
 					params = {
 						vmid: vm_id,
-						description: "#{provider_config.vm_name_prefix}#{env[:machine].name}",
+						name: env[:machine].config.vm.hostname || env[:machine].name.to_s,
+						sockets: config.qemu_sockets,
+						cores: config.qemu_cores,
+						memory: config.vm_memory,
+						agent: get_rest_boolean(config.qemu_agent),
+						description: desc
 					}
-					# delete existing network interfaces from template
-					to_delete = template_config.keys.select{|key| key.to_s.match(/^net/) }
-					params[:delete] = to_delete.join(",") if not to_delete.empty?
-					# net0 is the provisioning network, derived from forwarded_port
-					net_num = 0
-					hostname = vm_config.hostname || env[:machine].name
-					netdev0 = [
-						"type=user",
-						"id=net0",
-						"hostname=#{hostname}",
-						"hostfwd=tcp:#{@node_ip}:#{@guest_port}-:22",	# selected_node's primary ip and port (22000 + vm_id)
-					]
-					device0 = [
-						"#{provider_config.qemu_nic_model}",
-						"netdev=net0",
-						"bus=pci.0",
-						"addr=0x12",					# starting point for network interfaces
-						"id=net0",
-						"bootindex=299"
-					]
-					params[:args] = "-netdev " + netdev0.join(",") + " -device " + device0.join(",")
-					# now add a network device for every public_network or private_network
-					# ip addresses are ignored here, as we can't configure anything inside the qemu vm.
-					# at least we can set the predefined mac address and a bridge
-					net_num += 1
-					vm_config.networks.each do |type, options|
-						next if not type.match(/^p.*_network$/)
-						nic = provider_config.qemu_nic_model
-						nic += "=#{options[:macaddress]}" if options[:macaddress]
-						nic += ",bridge=#{options[:bridge]}" if options[:bridge]
-						net = 'net' + net_num.to_s
-						params[net] = nic
-						net_num += 1
+					if config.qemu_iso
+						params[:ide2] = "#{config.qemu_iso},media=cdrom"
 					end
-
-					# some more individual settings
-					params[:ide2] = "#{provider_config.qemu_iso},media=cdrom" if provider_config.qemu_iso
-					params[:sockets] = "#{provider_config.qemu_sockets}".to_i if provider_config.qemu_sockets
-					params[:cores] = "#{provider_config.qemu_cores}".to_i if provider_config.qemu_cores
-					params[:balloon] = "#{provider_config.vm_memory}".to_i if provider_config.vm_memory and provider_config.vm_memory < template_config[:balloon]
-					params[:memory] = "#{provider_config.vm_memory}".to_i if provider_config.vm_memory
 					params
 				end
 

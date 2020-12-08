@@ -19,7 +19,6 @@ module VagrantPlugins
 					rescue StandardError => e
 						raise VagrantPlugins::Proxmox::Errors::VMShutdownError, proxmox_exit_status: e.message
 					end
-					env[:ui].info I18n.t('vagrant_proxmox.done')
 
 					next_action env
 				end

@@ -18,8 +18,6 @@ module VagrantPlugins
 						env[:ui].detail "Using #{ip_address}:#{ssh_port} to connect to VM"
 						{host: ip_address, port: ssh_port}
 					end
-					env[:ui].detail "Found machine_ssh_info #{env[:machine_ssh_info]}"
-					env[:machine_ssh_info]
 					next_action env
 				end
 

@@ -31,20 +31,12 @@ and provision Proxmox virtual machines.
 Install using standard Vagrant plugin method:
 
 ```
-$ vagrant plugin install vagrant-proxmox
+$ vagrant plugin install vagrant-proxmox-0.2.0.gem
 ```
-
-This will install the plugin from [RubGems.org](http://rubygems.org/).
 
 ## Usage
 
-First install the provided dummy vagrant box:
-
-```
-$ vagrant box add dummy dummy_box/dummy.box
-```
-
-Then for an openvz container create a Vagrantfile that looks like the following (note that you might have to add "@pam" to your username if you're getting a "401 Unauthorized" error):
+For an openvz container create a Vagrantfile that looks like the following (note that you might have to add "@pam" to your username if you're getting a "401 Unauthorized" error):
 
 ```
 Vagrant.configure('2') do |config|
@@ -110,8 +102,14 @@ You can download an example Ubuntu based template [here](https://www.dropbox.com
 
 Finally run `vagrant up --provider=proxmox` to create and start the new OpenVZ container.
 
-## Options
+To make proxmox the default provider, add the following line at top level of the Vagrantfile.
 
+```ruby
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'proxmox'
+```
+
+## Options
+* `dry` Dont actually send data to the server.
 * `endpoint` URL of the JSON API endpoint of your Proxmox installation
 * `user_name` The name of the Proxmox user that Vagrant should use
 * `password` The password of the above user
@@ -141,8 +139,13 @@ Finally run `vagrant up --provider=proxmox` to create and start the new OpenVZ c
 * `qemu_sockets` The number of CPU sockets available to the VM
 * `qemu_nic_model` which model of network interface card to use, default 'e1000'
 * `qemu_bridge` connect automatically to this bridge, default 'vmbr0'
+* `qemu_agent` whether to enable to qemu agent endpoint.
 * `selected_node` If specified, only this specific node is used to create machines
 * `disable_adjust_forwarded_port` If true, no ssh manipulations will be done.
+* `pool` Resource pool to use.
+* `hostname_append_id` Appends guest ID to its' hostname. Note that this effectively sets the hostname to ID, if it was empty beforehand.
+* `full_clone` Creates full clone, instead of a linked one.
+* `lxc_ssh_public_keys` public keys to be added to the authorized keys file of the machine, one key per line.
 
 ## Debug RestClient Communication with Proxmox-Node
 
@@ -164,6 +167,21 @@ Build the plugin gem with
 ```
 $ rake build
 ```
+
+For non-ruby folks. Needs `ruby` and `zlib` development headers (on Debian: `apt-get install ruby-dev zlib1g-dev`).
+
+Use e.g. rvm to manage ruby versions. Do `rvm install "ruby-2.5.7"` to install the appropiate ruby version. Run `rvm use` then and check with `ruby --version` if it was properly activated. (If ruby complains about not using a login shell run `source ~/.rvm/scripts/rvm`)
+
+You may then install dependencies and build with: 
+```bash
+$ gem install bundler rake
+$ bundle install
+$ rake build
+```
+
+You can install the vagrant plugin then with `vagrant plugin install ./vagrant-proxmox-0.2.2.gem` (you might run into problems if you run it on a shell where you ran `rvm use` previously).
+
+Optionally run the rspec tests with `rake spec`. (Make sure, that vagrant is installed in the ruby env you are using.)
 
 Optionally run the rspec tests with
 

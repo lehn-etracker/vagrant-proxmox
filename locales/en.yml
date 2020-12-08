@@ -3,6 +3,8 @@ en:
     already_running: 'The virtual machine is already up and running'
     already_stopped: "The virtual machine is already stopped"
     creating_vm: 'Creating the virtual machine...'
+    cloning_vm: 'Creating the virtual machine from a template...'
+    configuring_vm: 'Configuring the virtual machine...'
     destroying_vm: 'Destroying the virtual machine...'
     done: "Done!"
     adjust_forwarded_port_params: 'Trying to adjust forwarded_port params'
@@ -58,6 +60,10 @@ en:
         Uploading a file to the proxmox server timed out.
       vm_create_error: |-
         Unable to create the virtual machine!
+
+        Cause: %{proxmox_exit_status}
+      vm_clone_error: |-
+        Unable to clone the virtual machine!
 
         Cause: %{proxmox_exit_status}
       vm_destroy_error: |-

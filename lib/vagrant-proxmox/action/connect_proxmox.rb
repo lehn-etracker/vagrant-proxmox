@@ -13,6 +13,7 @@ module VagrantPlugins
 
 				def call env
 					begin
+						@logger.debug 'connecting proxmox'
 						config = env[:machine].provider_config
 						connection = Connection.new config.endpoint,
 																				vm_id_range: config.vm_id_range,

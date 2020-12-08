@@ -20,8 +20,6 @@ module VagrantPlugins
 						raise VagrantPlugins::Proxmox::Errors::VMStopError, proxmox_exit_status: e.message
 					end
 
-					env[:ui].info I18n.t('vagrant_proxmox.done')
-
 					next_action env
 				end
 
