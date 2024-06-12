@@ -74,6 +74,11 @@ module VagrantPlugins
       # @return [Integer]
       attr_accessor :task_timeout
 
+      # The maximum timeout given to proxmox server for shutdown and restart tasks (in seconds)
+      #
+      # @return [Integer]
+      attr_accessor :shutdown_timeout
+
       # The interval between two proxmox task status retrievals (in seconds)
       #
       # @return [Integer, Proc]
@@ -405,6 +410,7 @@ module VagrantPlugins
         @vm_disk_size = '20G'
         @vm_storage = 'local'
         @task_timeout = 60
+        @shutdown_timeout = 30
         @task_status_check_interval = 2
         @ssh_timeout = 60
         @ssh_status_check_interval = 5

@@ -13,15 +13,19 @@ module VagrantPlugins
       attr_reader :csrf_token
       attr_accessor :vm_id_range
       attr_accessor :task_timeout
+      attr_accessor :shutdown_timeout
       attr_accessor :task_status_check_interval
       attr_accessor :imgcopy_timeout
+      attr_accessor :ui
 
       def initialize(api_url, opts = {})
         @api_url = api_url
         @vm_id_range = opts[:vm_id_range] || (900..999)
         @task_timeout = opts[:task_timeout] || 60
+        @shutdown_timeout = opts[:shutdown_timeout] || 60
         @task_status_check_interval = opts[:task_status_check_interval] || 2
         @imgcopy_timeout = opts[:imgcopy_timeout] || 120
+        @ui = opts[:ui]
       end
 
       def login(username: required('username'), password: required('password'))
@@ -125,8 +129,19 @@ module VagrantPlugins
 
       def shutdown_vm(vm_id)
         vm_info = get_vm_info vm_id
-        response = post "/nodes/#{vm_info[:node]}/#{vm_info[:type]}/#{vm_id}/status/shutdown", nil
-        wait_for_completion task_response: response, timeout_message: 'vagrant_proxmox.errors.shutdown_vm_timeout'
+        retryable(on: VagrantPlugins::Proxmox::Errors::Timeout,
+                  tries: 2,
+                  sleep: task_status_check_interval) do
+                    @ui.info "shutting down #{vm_info[:type]} with id #{vm_id} (timeout=#{@shutdown_timeout}s)"
+                    response = post "/nodes/#{vm_info[:node]}/#{vm_info[:type]}/#{vm_id}/status/shutdown?timeout=#{@shutdown_timeout}", nil
+                    exit_status = wait_for_completion task_response: response, timeout_message: 'vagrant_proxmox.errors.shutdown_vm_timeout'
+                    if exit_status == 'container did not stop'
+                      @ui.warn "shutdown task timed out after #{@shutdown_timeout}s"
+                      raise(VagrantPlugins::Proxmox::Errors::Timeout)
+                    else
+                      exit_status
+                    end
+                  end
       end
 
       def get_free_vm_id
