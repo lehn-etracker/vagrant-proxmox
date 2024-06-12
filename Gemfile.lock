@@ -28,7 +28,7 @@ GIT
 PATH
   remote: .
   specs:
-    vagrant-proxmox (0.3.0)
+    vagrant-proxmox (0.3.1)
       activesupport (~> 5.0)
       rest-client (>= 2.0.0, < 3.0)
       retryable (~> 1.3, >= 1.3.3)
